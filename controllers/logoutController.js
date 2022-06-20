@@ -3,21 +3,20 @@ const userDB ={
     setUsers: function (data){this.users = data}
 } 
 
-
-const { error } = require('console');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const fspromises = require('fs').promises;
-
+const path = require('path');
 
 const handleRefreshToken = (req,res) =>{
+
     const cookies = req.cookies;
-    console.log(cookies);
-    if(!cookies?.jwt) return res.status(401);
-    console.log(cookies.jwt);
+    if(!cookies?.jwt) return res.sendStatus(204);
     const refreshToken = cookies.jwt;
+
 const finduser = userDB.users.find(person => person.refreshToken === refreshToken);
-if(!finduser) return res.status(403);
+if(!finduser){
+    res.clearCookie('jwt',{httpOnly:true})
+    return res.status(204);
+} 
 
 jwt.verify(
     jwt.refreshToken,
